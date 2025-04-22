@@ -76,11 +76,8 @@ class Source(Base):
         comment="Text content parsed from the source file or link."
     )
     title: Mapped[str] = mapped_column(String(512), nullable=False)
-    path: Mapped[Optional[str]] = mapped_column(
-        String(1024),
-        nullable=True,
-        comment="User-defined organizational path or category."
-    )
+    brief: Mapped[str] = mapped_column(Text, nullable=False)
+    summary: Mapped[str] = mapped_column(Text, nullable=False)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )

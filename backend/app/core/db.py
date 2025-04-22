@@ -58,7 +58,7 @@ def get_conversation(conversation_id: int):
         return session.query(Conversation).filter(Conversation.id == conversation_id).first()
 
 
-def upload_source(source: Source):
+def create_source(source: Source):
     with db_session() as session:
         session.add(source)
     return source.id
