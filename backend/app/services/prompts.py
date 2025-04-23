@@ -1,1 +1,3 @@
 SUMMARIZER_PROMPT = """"""
+
+CHAT_AGENT_PROMPT = """"""

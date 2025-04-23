@@ -1,0 +1,54 @@
+version: '3.9'
+
+x-backend-common: &backend_common
+  build:
+    context: ./backend
+    dockerfile: Dockerfile
+  env_file:
+    - path: ./backend/.env
+      required: false
+  volumes:
+    - ./backend/app:/usr/src/app
+    # Optional mount for tests — only during development
+    - ./backend/tests:/usr/src/app/tests:delegated
+    - ./backend/pyproject.toml:/usr/src/app/pyproject.toml
+    - ./backend/poetry.lock:/usr/src/app/poetry.lock
+
+x-frontend-common: &frontend_common
+  build:
+    context: ./frontend
+  env_file:
+    - path: ./frontend/.env
+      required: false
+  volumes:
+    - ./frontend/:/usr/src/app
+
+services:
+  zynapse-api:
+    <<: *backend_common
+    command: poetry run python -m app.main
+    ports:
+      - "8000:8000"
+    depends_on:
+      - redis
+
+  zynapse-worker:
+    <<: *backend_common
+    command: bash -c "poetry run dramatiq app.main --broker=redis://redis:6379/0"
+    ports:
+      - "8001:8001"
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  # zynapse-frontend:
+  #   <<: *frontend_common
+  #   command: npm run start
+  #   ports:
+  #     - "3000:3000"
+  #   depends_on:
+  #     - zynapse-api

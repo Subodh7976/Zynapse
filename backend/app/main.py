@@ -1,15 +1,18 @@
 from fastapi import FastAPI, UploadFile, HTTPException
-from pydantic import BaseModel
+from fastapi.responses import JSONResponse, Response
 from typing import Any, Dict
 import traceback
+import uvicorn
 import os
 import shutil
 
-from app.core.constants import SourceTypeEnum
+from app.config import SourceTypeEnum, redis_repo
 from app.core.db import create_conversation, create_source
 from app.core.models import Conversation, Source
 from app.services.summarizer import get_brief_summary
 from app.helper.parsers import get_web_content, get_youtube_transcript, parse_pdf
+from app.worker import async_chat_task
+from app.core.schema import *
 
 
 class ExceptionHandler:
@@ -29,16 +32,6 @@ class ExceptionHandler:
 
 
 app = FastAPI()
-
-
-class InitiateConversation(BaseModel):
-    title: str
-
-
-class UploadSource(BaseModel):
-    source: UploadFile | str
-    type: SourceTypeEnum
-    conversation_id: str
 
 
 @app.post("/initiate-conversation")
@@ -105,3 +98,34 @@ async def upload_source(request: UploadSource):
         return {"source_id": source_id}
     except Exception:
         return ExceptionHandler.handle_exception()
+
+
+@app.post("/chat")
+async def chat_request(request: ChatRequest):
+    try:
+        request_id = redis_repo.create_record()
+        response = async_chat_task.send(
+            request_id, request.model_dump_json()
+        )
+        print(response)
+        return JSONResponse({"request_id": request_id})
+    except Exception:
+        return ExceptionHandler.handle_exception()
+
+
+@app.get("/chat")
+async def chat_update(request_id: str):
+    try:
+        record = redis_repo.get_record(record_id=request_id)
+        print("record: ")
+        print(record)
+        if record:
+            return JSONResponse(record)
+        else:
+            return Response(status_code=404, content="Record not found")
+    except Exception:
+        return ExceptionHandler.handle_exception()
+
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8000)
