@@ -21,7 +21,7 @@ async def async_chat(request_id: str, request: str):
     request = ChatRequest.model_validate_json(request)
     print(f"Validated chat request: {request.model_dump_json()}")
 
-    response_generator = chat(request.query, request.conversation_id)
+    response_generator = chat(request.query, request.conversation_id, request_id, redis_repo)
 
     async for state in response_generator:
         print(f"Received state: {state}")
