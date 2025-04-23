@@ -10,6 +10,8 @@ CONVERSATION_EXPIRY_MINUTES = 30
 
 SUMMARIZER_MODEL = "gemini-2.0-flash"
 CHAT_AGENT_MODEL = "gemini-2.0-flash"
+MIND_MAP_MODEL = "gemini-2.0-flash"
+FLOW_MODEL = "gemini-2.0-flash"
 
 REDIS_HOST = "redis"
 REDIS_PREFIX = "zynapse.service"

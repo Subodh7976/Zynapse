@@ -5,6 +5,7 @@ import uuid
 
 from app.core.schema import UpdateState
 from app.repository import RedisRepository
+from app.core.db import get_sources
 
 
 def with_redis_updates(func):
@@ -54,20 +55,31 @@ class RequestTrackedTool(BaseTool):
 
 
 @with_redis_updates
-def retrieve_sources_complete(sources: list[str], **kwargs) -> str:
+def retrieve_sources_complete(source_ids: list[str], **kwargs) -> str:
     """
     retrieves the list of sources (given by id) and merges the complete content in markdown format
 
     Args:
-        sources (list[str]): list of source IDs
+        source_ids (list[str]): list of source IDs
 
     Returns:
         str: combined source content in markdown format
     """
-    pass
+    update_state = kwargs['update_state']
+    sources = get_sources(source_ids)
+
+    source_titles = [source.title for source in sources]
+    update_state(UpdateState(type="sources", content=source_titles))
+
+    sources_description = ""
+    for source in sources:
+        sources_description += f"**{source.title}:**\n{source.content}\n\n"
+
+    return sources_description
+
 
 @with_redis_updates
-def retrieve_sources_summary(sources: list[str], **kwargs) -> str:
+def retrieve_sources_summary(source_ids: list[str], **kwargs) -> str:
     """
     retrieves the list of sources (given by id) and merges only the summary content in markdown format
 
@@ -77,20 +89,17 @@ def retrieve_sources_summary(sources: list[str], **kwargs) -> str:
     Returns:
         str: combined source content in markdown format
     """
-    pass
+    update_state = kwargs['update_state']
+    sources = get_sources(source_ids)
 
-@with_redis_updates
-def retrieve_all_sources_summary(sources: list[str], **kwargs) -> str:
-    """
-    retrieves the list of sources (given by id) and merges only the summary content in markdown format
+    source_titles = [source.title for source in sources]
+    update_state(UpdateState(type="sources", content=source_titles))
 
-    Args:
-        sources (list[str]): list of source IDs
+    sources_description = ""
+    for source in sources:
+        sources_description += f"**{source.title}:**\n{source.summary}\n\n"
 
-    Returns:
-        str: combined source content in markdown format
-    """
-    pass
+    return sources_description
 
 
 def create_tools_for_request(request_id: str, redis_repo: RedisRepository):

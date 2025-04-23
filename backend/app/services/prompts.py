@@ -1,3 +1,7 @@
 SUMMARIZER_PROMPT = """"""
 
 CHAT_AGENT_PROMPT = """"""
+
+MIND_MAP_PROMPT = """"""
+
+FLOW_PROMPT = """"""
