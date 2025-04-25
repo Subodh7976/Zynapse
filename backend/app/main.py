@@ -1,18 +1,19 @@
-from fastapi import FastAPI, UploadFile, HTTPException
+from fastapi import FastAPI, File, UploadFile, Form, HTTPException
 from fastapi.responses import JSONResponse, Response
+from fastapi.middleware.cors import CORSMiddleware
 from typing import Any, Dict
 import traceback
 import uvicorn
 import os
 import shutil
 
-from app.config import SourceTypeEnum, redis_repo
-from app.core.db import create_conversation, create_source
-from app.core.models import Conversation, Source
-from app.services.summarizer import get_brief_summary
-from app.helper.parsers import get_web_content, get_youtube_transcript, parse_pdf
-from app.worker import async_chat_task
-from app.core.schema import *
+from core.schema import *
+from worker import async_chat_task
+from helper.parsers import get_web_content, get_youtube_transcript, parse_pdf
+from services.summarizer import get_brief_summary
+from core.models import Conversation, Source
+from core.db import create_conversation, create_source
+from config import SourceTypeEnum, redis_repo
 
 
 class ExceptionHandler:
@@ -34,6 +35,19 @@ class ExceptionHandler:
 app = FastAPI()
 
 
+origins = [
+    "*"
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
 @app.post("/initiate-conversation")
 async def initiate_conversation(request: InitiateConversation):
     try:
@@ -45,13 +59,20 @@ async def initiate_conversation(request: InitiateConversation):
 
 
 @app.post("/upload-source")
-async def upload_source(request: UploadSource):
-    if isinstance(request.source, UploadFile) and request.source.content_type != "application/pdf":
+async def upload_source(
+    source: UploadFile | str = File(...,
+                                    description="The PDF file or URL to upload"),
+    source_type: str = Form(...,
+                            description="The type of source (e.g., 'document')"),
+    conversation_id: str = Form(...,
+                                description="The associated conversation ID")
+):
+    if source.content_type != "application/pdf":
         raise HTTPException(400, detail="Only PDF files are allowed")
 
     try:
-        if isinstance(request.source, UploadFile) and request.type == SourceTypeEnum.DOCUMENT:
-            file = request.source
+        if source_type == SourceTypeEnum.DOCUMENT.value:
+            file = source
             filename = file.filename
 
             # Save the file
@@ -71,10 +92,10 @@ async def upload_source(request: UploadSource):
                 raise e
 
             os.remove(file_path)
-        elif isinstance(request.source, str) and request.type == SourceTypeEnum.WEB:
-            title, content = get_web_content(request.source)
-        elif isinstance(request.source, str) and request.type == SourceTypeEnum.YOUTUBE:
-            response = get_youtube_transcript(request.source)
+        elif isinstance(source, str) and source_type == SourceTypeEnum.WEB.value:
+            title, content = get_web_content(source)
+        elif isinstance(source, str) and source_type == SourceTypeEnum.YOUTUBE.value:
+            response = get_youtube_transcript(source)
 
             if response['success']:
                 title = response['title']
@@ -84,10 +105,10 @@ async def upload_source(request: UploadSource):
         else:
             raise Exception("Unknown type of the source")
 
-        response = get_brief_summary(request.type, content)
+        response = await get_brief_summary(source_type, content)
         source = Source(
-            conversation_id=request.conversation_id, type=request.type,
-            link=request.source if request.type != SourceTypeEnum.DOCUMENT else None,
+            conversation_id=conversation_id, type=SourceTypeEnum.DOCUMENT,
+            link=None if source_type == SourceTypeEnum.DOCUMENT.value else source,
             content=content, title=title, brief=response.get(
                 "brief", "Not available"),
             summary=response.get("summary", "Not available")

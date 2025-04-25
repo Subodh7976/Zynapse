@@ -9,7 +9,7 @@ from typing import List, Optional, Dict, Any
 from datetime import datetime
 import uuid
 
-from backend.app.config import SourceTypeEnum
+from config import SourceTypeEnum
 
 class Base(DeclarativeBase):
     pass

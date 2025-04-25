@@ -2,9 +2,9 @@ from langgraph.prebuilt import create_react_agent
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.prompts import PromptTemplate
 
-from app.config import CHAT_AGENT_MODEL
-from app.helper.utils import build_sources_description
-from app.core.schema import UpdateState
+from config import CHAT_AGENT_MODEL
+from helper.utils import build_sources_description
+from core.schema import UpdateState
 from .tools import create_tools_for_request
 from .mcp import create_mcp_tools
 from .prompts import CHAT_AGENT_PROMPT

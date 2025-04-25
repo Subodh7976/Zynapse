@@ -3,7 +3,7 @@ from langchain_core.prompts import PromptTemplate
 from langchain_google_genai import ChatGoogleGenerativeAI
 from pydantic import BaseModel, Field
 
-from backend.app.config import SUMMARIZER_MODEL
+from config import SUMMARIZER_MODEL
 from .prompts import SUMMARIZER_PROMPT
 
 

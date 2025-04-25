@@ -3,9 +3,9 @@ from typing import Callable, Dict, Any
 import asyncio
 import uuid
 
-from app.core.schema import UpdateState
-from app.repository import RedisRepository
-from app.core.db import get_sources
+from core.schema import UpdateState
+from repository import RedisRepository
+from core.db import get_sources
 
 
 def with_redis_updates(func):

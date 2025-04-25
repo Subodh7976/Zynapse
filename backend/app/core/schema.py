@@ -2,7 +2,7 @@ from fastapi import UploadFile
 from pydantic import BaseModel
 from typing import Any
 
-from backend.app.config import SourceTypeEnum
+from config import SourceTypeEnum
 
 
 class InitiateConversation(BaseModel):

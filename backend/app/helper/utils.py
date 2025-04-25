@@ -1,5 +1,5 @@
 
-from app.core.db import get_all_source
+from core.db import get_all_source
 
 
 def build_sources_description(conversation_id: str) -> str:

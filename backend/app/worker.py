@@ -3,9 +3,9 @@ import dramatiq
 from dramatiq.brokers.redis import RedisBroker
 from dramatiq.middleware import AsyncIO
 
-from app.config import REDIS_HOST, REDIS_PREFIX, redis_repo
-from app.core.schema import ChatRequest
-from app.services import chat
+from config import REDIS_HOST, REDIS_PREFIX, redis_repo
+from core.schema import ChatRequest
+from services import chat
 
 
 redis_broker = RedisBroker(host=REDIS_HOST, middleware=[

@@ -1,7 +1,7 @@
 from enum import Enum
 from pathlib import Path
 
-from app.repository import RedisRepository
+from repository import RedisRepository
 
 MAX_FILE_SIZE = 10 * 1024 * 1024  # 10 MB
 UPLOADS_DIR = Path("./uploaded_files_temp")

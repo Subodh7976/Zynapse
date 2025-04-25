@@ -4,7 +4,7 @@ from langchain_core.prompts import PromptTemplate
 from pydantic import BaseModel, Field
 from typing import List
 
-from app.config import MIND_MAP_MODEL
+from config import MIND_MAP_MODEL
 from .prompts import MIND_MAP_PROMPT
 
 
@@ -29,5 +29,5 @@ async def generate_map(context: str):
         response = await chain.ainvoke({"context": context})
     except Exception as e:
         print("Exception in Mind Map - ", e)
-        response = {}
+        response = None
     return response

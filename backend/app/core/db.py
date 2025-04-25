@@ -50,7 +50,9 @@ def db_session():
 def create_conversation(conversation: Conversation):
     with db_session() as session:
         session.add(conversation)
-    return conversation.id
+        session.flush()
+        conv_id = conversation.id
+    return conv_id
 
 
 def get_conversation(conversation_id: int):
@@ -61,7 +63,9 @@ def get_conversation(conversation_id: int):
 def create_source(source: Source):
     with db_session() as session:
         session.add(source)
-    return source.id
+        session.flush()
+        source_id = source.id
+    return source_id
 
 
 def update_conversation(conversation_id: str, update_data: Dict[str, Any]):
@@ -76,7 +80,7 @@ def update_conversation(conversation_id: str, update_data: Dict[str, Any]):
             if hasattr(conv, key):
                 setattr(conv, key, value)
 
-    return conv
+        return conv
 
 
 def get_source(source_id: str):

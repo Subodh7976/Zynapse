@@ -1,7 +1,7 @@
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.prompts import PromptTemplate
 
-from app.config import FLOW_MODEL
+from config import FLOW_MODEL
 from .prompts import FLOW_PROMPT
 
 
