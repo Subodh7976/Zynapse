@@ -5,7 +5,7 @@ from typing import Any
 from config import SourceTypeEnum
 
 
-class InitiateConversation(BaseModel):
+class InitiatePage(BaseModel):
     title: str
 
 
