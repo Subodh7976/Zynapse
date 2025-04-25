@@ -33,7 +33,6 @@ const CreatePageModal: React.FC<CreatePageModalProps> = ({
     current: 0,
     total: 0,
   });
-  // Store errors as objects for more context if needed, but strings are fine for now
   const [uploadErrors, setUploadErrors] = useState<
     { name: string; message: string }[]
   >([]);
@@ -80,10 +79,8 @@ const CreatePageModal: React.FC<CreatePageModalProps> = ({
     fileInputRef.current?.click();
   };
 
-  // Function to add unique errors
   const addUploadError = (name: string, message: string) => {
     setUploadErrors((prev) => {
-      // Avoid adding duplicate errors for the same source if retried (though we don't retry here)
       if (prev.some((err) => err.name === name && err.message === message)) {
         return prev;
       }
@@ -95,7 +92,7 @@ const CreatePageModal: React.FC<CreatePageModalProps> = ({
     if (!title.trim() || isSubmitting) return;
 
     setIsSubmitting(true);
-    setUploadErrors([]); // Clear previous errors
+    setUploadErrors([]);
     setUploadProgress({ current: 0, total: 0 });
     setPageId(null);
 
@@ -162,17 +159,28 @@ const CreatePageModal: React.FC<CreatePageModalProps> = ({
         console.log(`Starting upload of ${totalSources} sources...`);
         for (let i = 0; i < totalSources; i++) {
           const source = sourcesToUpload[i];
-          const sourceName = source.name; // For clearer error messages
+          const sourceName = source.name;
 
-          // Update progress immediately for visual feedback
           setUploadProgress((prev) => ({ ...prev, current: i + 1 }));
 
           const formData = new FormData();
           formData.append("page_id", receivedPageId);
           formData.append("source_type", source.type);
+
           if (source.type === "document" && source.data instanceof File) {
             formData.append("source", source.data, source.data.name);
+            console.log(
+              `Appending file to FormData with key 'source': ${source.data.name}`
+            );
+          } else if (source.type === "web" || source.type === "youtube") {
+            formData.append("url", source.data as string);
+            console.log(
+              `Appending URL to FormData with key 'url': ${source.data}`
+            );
           } else {
+            console.warn(
+              `Unexpected source type '${source.type}' for source '${sourceName}'. Appending data with key 'source'.`
+            );
             formData.append("source", source.data as string);
           }
 
@@ -188,14 +196,11 @@ const CreatePageModal: React.FC<CreatePageModalProps> = ({
               body: formData,
             });
 
-            // --- Check Response ---
             if (uploadResponse.ok) {
-              // Try to parse JSON, it might be empty or malformed
               let successData;
               try {
                 successData = await uploadResponse.json();
               } catch (jsonError) {
-                // Handle cases where backend sends 200 OK but invalid JSON
                 console.error(
                   `Error parsing JSON response for ${sourceName}:`,
                   jsonError
@@ -204,17 +209,14 @@ const CreatePageModal: React.FC<CreatePageModalProps> = ({
                   sourceName,
                   `Upload OK, but failed to parse response.`
                 );
-                continue; // Skip to next source
+                continue;
               }
 
-              // Check for the specific source_id field
               if (successData && successData.source_id) {
                 console.log(
                   `Successfully uploaded ${sourceName}, received source_id: ${successData.source_id}`
                 );
-                // Optionally store the source_id if needed elsewhere
               } else {
-                // Backend returned 200 OK but didn't include source_id
                 console.warn(
                   `Upload OK for ${sourceName}, but response missing 'source_id'. Treating as partial failure.`
                 );
@@ -224,26 +226,22 @@ const CreatePageModal: React.FC<CreatePageModalProps> = ({
                 );
               }
             } else {
-              // Handle non-OK responses (4xx, 5xx)
               let errorDetail = `Failed with status ${uploadResponse.status}`;
               try {
                 const errorData = await uploadResponse.json();
-                errorDetail = errorData.detail || errorDetail; // Use detail if available
+                errorDetail = errorData.detail || errorDetail;
               } catch (jsonError) {
-                // Ignore if error response is not JSON
                 console.warn(
                   `Could not parse error response for ${sourceName}. Status: ${uploadResponse.status}`
                 );
               }
               console.error(`Error uploading ${sourceName}:`, errorDetail);
-              // **Use the specific error format requested**
               addUploadError(
                 sourceName,
                 `Failed to add source - ${errorDetail}`
               );
             }
           } catch (uploadError) {
-            // Handle network/fetch errors
             console.error(
               `Network or fetch error uploading ${sourceName}:`,
               uploadError
@@ -252,7 +250,6 @@ const CreatePageModal: React.FC<CreatePageModalProps> = ({
               uploadError instanceof Error
                 ? uploadError.message
                 : "Network error";
-            // **Use the specific error format requested**
             addUploadError(sourceName, `Failed to add source - ${message}`);
           }
         } // End of for loop
@@ -269,9 +266,8 @@ const CreatePageModal: React.FC<CreatePageModalProps> = ({
         error instanceof Error
           ? error.message
           : "An unexpected error occurred.";
-      // Show critical errors prominently
       addUploadError("Page Initialization", message);
-      setIsSubmitting(false); // Allow retry/close only on critical failure
+      setIsSubmitting(false);
     }
   };
 
@@ -287,6 +283,7 @@ const CreatePageModal: React.FC<CreatePageModalProps> = ({
       : 0;
 
   return (
+    // Modal Structure (no changes needed here)
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 p-4 transition-opacity duration-300 ease-in-out"
       onClick={handleClose}
@@ -433,7 +430,7 @@ https://youtu.be/..."
                 <div
                   className={`h-2.5 rounded-full transition-all duration-300 ease-out ${
                     uploadErrors.length > 0 ? "bg-orange-500" : "bg-purple-600"
-                  }`} // Change color if errors
+                  }`}
                   style={{ width: `${progressPercentage}%` }}
                 ></div>
               </div>
@@ -443,12 +440,9 @@ https://youtu.be/..."
           {/* Error Display */}
           {uploadErrors.length > 0 && (
             <div className="mt-4 space-y-1 rounded-md bg-red-50 p-3 max-h-32 overflow-y-auto">
-              {" "}
-              {/* Added max-height and overflow */}
               <p className="text-sm font-medium text-red-800">Details:</p>
               <ul className="list-disc list-inside text-sm text-red-700">
                 {uploadErrors.map((error, index) => (
-                  // Display the structured error message
                   <li key={index}>
                     <span className="font-semibold">{error.name}:</span>{" "}
                     {error.message}
