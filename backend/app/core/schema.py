@@ -17,7 +17,7 @@ class UploadSource(BaseModel):
 
 class ChatRequest(BaseModel):
     query: str
-    conversation_id: str
+    page_id: str
 
 
 class UpdateState(BaseModel):

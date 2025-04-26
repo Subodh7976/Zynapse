@@ -1,5 +1,5 @@
 
-from core.db import get_all_source
+from core.db import get_all_sources
 
 
 def build_sources_description(conversation_id: str) -> str:
@@ -12,7 +12,7 @@ def build_sources_description(conversation_id: str) -> str:
     Returns:
         str: combined sources in markdown format
     """
-    sources = get_all_source(conversation_id)
+    sources = get_all_sources(conversation_id)
 
     sources_description = "**Sources available:**"
     sources_description += "| Source ID | Source Title | Source Description |\n| --- | --- | --- |\n"

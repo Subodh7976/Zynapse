@@ -87,10 +87,16 @@ def get_source(source_id: str):
     with db_session() as session:
         return session.query(Source).filter(Source.id == source_id).first()
 
+
 def get_sources(source_ids: list[str]):
     with db_session() as session:
         return session.query(Source).filter(Source.id.in_(source_ids)).all()
 
-def get_all_source(conversation_id: str):
+
+def get_all_sources(conversation_id: str):
     with db_session() as session:
-        return session.query(Source).filter(Source.conversation_id == conversation_id).all()
+        sources = session.query(Source).filter(
+            Source.conversation_id == conversation_id).all()
+        for source in sources:
+            session.expunge(source)
+    return sources

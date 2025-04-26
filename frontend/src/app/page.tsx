@@ -13,10 +13,10 @@ export default function HomePage() {
   const closeModal = () => setIsModalOpen(false);
 
   // Define the placeholder onCreate function (will be updated later)
-  const handleCreatePage = (data: { title: string; files: FileList | null; webLinks: string; youtubeLinks: string }) => {
-      console.log("Data received from modal:", data);
-      // Later: Trigger API call and navigation/progress display
-  };
+  // const handleCreatePage = (data: { title: string; files: FileList | null; webLinks: string; youtubeLinks: string }) => {
+  //     console.log("Data received from modal:", data);
+  //     // Later: Trigger API call and navigation/progress display
+  // };
 
 
   return (

@@ -9,14 +9,13 @@ import shutil
 from dotenv import load_dotenv
 load_dotenv()
 
-from core.schema import *
-from worker import async_chat_task
-from helper.parsers import get_web_content, get_youtube_info, parse_pdf
-from services.summarizer import get_brief_summary
-from core.models import Conversation, Source
-from core.db import create_conversation, create_source
 from config import SourceTypeEnum, redis_repo
-
+from core.db import create_conversation, create_source, get_all_sources
+from core.models import Conversation, Source
+from services.summarizer import get_brief_summary
+from helper.parsers import get_web_content, get_youtube_info, parse_pdf
+from worker import async_chat_task
+from core.schema import *
 
 class ExceptionHandler:
     @staticmethod
@@ -64,12 +63,12 @@ async def initiate_page(request: InitiatePage):
 @app.post("/upload-source")
 async def upload_source(
     source: Optional[UploadFile] = File(None,
-                                    description="The PDF file to upload"),
+                                        description="The PDF file to upload"),
     url: Optional[str] = Form(None, description="The URL to upload"),
     source_type: str = Form(...,
                             description="The type of source (e.g., 'document')"),
     page_id: str = Form(...,
-                                description="The associated conversation ID")
+                        description="The associated conversation ID")
 ):
     # import random
     # return {"source_id": "page_id"+str(random.randint(1, 100000))}
@@ -82,6 +81,7 @@ async def upload_source(
         if source_type == SourceTypeEnum.DOCUMENT.value and source:
             file = source
             filename = file.filename
+            doc_type = SourceTypeEnum.DOCUMENT
 
             # Save the file
             upload_dir = "uploads"
@@ -102,16 +102,16 @@ async def upload_source(
             os.remove(file_path)
         elif url and source_type == SourceTypeEnum.WEB.value:
             response = get_web_content(url)
-            if response:
-                title, content = response
-            else:
-                title, content = "Not Available", "Not Available"
+            title, content = url, response
+            doc_type = SourceTypeEnum.WEB
         elif url and source_type == SourceTypeEnum.YOUTUBE.value:
             response = get_youtube_info(url)
 
-            response = response if response and isinstance(response, dict) else {}
+            response = response if response and isinstance(
+                response, dict) else {}
             title = response.get('title', url)
             content = response.get("transcript", "Not Available").strip()
+            doc_type = SourceTypeEnum.YOUTUBE
             print(title, content)
             # else:
             #     raise Exception("Failed to fetch Youtube transcript" + str(response['error']))
@@ -120,7 +120,7 @@ async def upload_source(
 
         response = await get_brief_summary(source_type, content)
         source_entry = Source(
-            conversation_id=page_id, type=SourceTypeEnum.DOCUMENT,
+            conversation_id=page_id, type=doc_type,
             link=url,
             content=content, title=title, brief=response.get(
                 "brief", "Not available"),
@@ -132,6 +132,24 @@ async def upload_source(
         return {"source_id": source_id}
     except Exception as e:
         print(e)
+        return ExceptionHandler.handle_exception()
+
+
+@app.get("/fetch-page")
+async def fetch_page(page_id: str):
+    try:
+        sources = get_all_sources(page_id)
+        sources = [
+            {
+                "id": source.id,
+                "title": source.title,
+                "type": source.type.value,
+                "link": source.link
+            }
+            for source in sources
+        ]
+        return {"sources": sources, "title": "Sample", "summary": "This is a sample summary of sources."}
+    except Exception:
         return ExceptionHandler.handle_exception()
 
 

@@ -232,7 +232,7 @@ const CreatePageModal: React.FC<CreatePageModalProps> = ({
                 errorDetail = errorData.detail || errorDetail;
               } catch (jsonError) {
                 console.warn(
-                  `Could not parse error response for ${sourceName}. Status: ${uploadResponse.status}`
+                  `Could not parse error response for ${sourceName}. Status: ${uploadResponse.status} Error ${jsonError}`
                 );
               }
               console.error(`Error uploading ${sourceName}:`, errorDetail);

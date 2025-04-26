@@ -1,54 +1,63 @@
-version: '3.9'
-
-x-backend-common: &backend_common
-  build:
-    context: ./backend
-    dockerfile: Dockerfile
-  env_file:
-    - path: ./backend/.env
-      required: false
-  volumes:
-    - ./backend/app:/usr/src/app
-    # Optional mount for tests — only during development
-    - ./backend/tests:/usr/src/app/tests:delegated
-    - ./backend/pyproject.toml:/usr/src/app/pyproject.toml
-    - ./backend/poetry.lock:/usr/src/app/poetry.lock
-
-x-frontend-common: &frontend_common
-  build:
-    context: ./frontend
-  env_file:
-    - path: ./frontend/.env
-      required: false
-  volumes:
-    - ./frontend/:/usr/src/app
-
 services:
-  zynapse-api:
-    <<: *backend_common
-    command: poetry run python -m app.main
+  backend-api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: zynapse-backend-api
+    env_file:
+      - path: ./backend/.env
+        required: false
+    command: uvicorn main:app --host 0.0.0.0 --port 8000
     ports:
       - "8000:8000"
     depends_on:
       - redis
+    restart: unless-stopped
+    networks:
+      - zynapse-net
 
-  zynapse-worker:
-    <<: *backend_common
-    command: bash -c "poetry run dramatiq app.main --broker=redis://redis:6379/0"
-    ports:
-      - "8001:8001"
+  backend-worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: zynapse-backend-worker
+    env_file:
+      - path: ./backend/.env
+        required: false
+    command: dramatiq worker
     depends_on:
       - redis
+    restart: unless-stopped
+    networks:
+      - zynapse-net
 
   redis:
     image: redis:7-alpine
-    ports:
-      - "6379:6379"
+    container_name: zynapse-redis
+    volumes:
+      - redis-data:/data
+    restart: unless-stopped
+    networks:
+      - zynapse-net
 
-  # zynapse-frontend:
-  #   <<: *frontend_common
-  #   command: npm run start
-  #   ports:
-  #     - "3000:3000"
-  #   depends_on:
-  #     - zynapse-api
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: zynapse-frontend
+    env_file:
+      - path: ./frontend/.env
+        required: false
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+    networks:
+      - zynapse-net
+
+volumes:
+  redis-data:
+    driver: local
+
+networks:
+  zynapse-net:
+    driver: bridge
