@@ -7,7 +7,7 @@ services:
     env_file:
       - path: ./backend/.env
         required: false
-    command: uvicorn main:app --host 0.0.0.0 --port 8000
+    command: python -m main
     ports:
       - "8000:8000"
     depends_on:

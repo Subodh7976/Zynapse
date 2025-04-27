@@ -9,7 +9,7 @@ UPLOADS_DIR.mkdir(parents=True, exist_ok=True)
 CONVERSATION_EXPIRY_MINUTES = 30
 
 SUMMARIZER_MODEL = "gemini-2.0-flash"
-CHAT_AGENT_MODEL = "gemini-2.0-flash"
+CHAT_AGENT_MODEL = "gemini-2.5-flash-preview-04-17"
 MIND_MAP_MODEL = "gemini-2.0-flash"
 FLOW_MODEL = "gemini-2.0-flash"
 

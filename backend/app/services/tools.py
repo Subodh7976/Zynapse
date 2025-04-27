@@ -1,12 +1,14 @@
 from langchain.tools import BaseTool
 from typing import Callable, Dict, Any
 import asyncio
-import uuid
+from pydantic import BaseModel, Field
 
 from core.schema import UpdateState
 from repository import RedisRepository
 from core.db import get_sources
 
+class SourceIdsInput(BaseModel):
+    source_ids: list[str] = Field(..., description="List of source IDs to retrieve")
 
 def with_redis_updates(func):
     """Decorator that enables Redis state updates from within tool functions."""
@@ -21,7 +23,7 @@ def with_redis_updates(func):
 
         def update_state(state_update: UpdateState):
             redis_repo.update_record(
-                record_id=request_id, state=state_update.model_dump())
+                record_id=request_id, record=state_update.model_dump())
 
         kwargs["update_state"] = update_state
 
@@ -106,15 +108,17 @@ def create_tools_for_request(request_id: str, redis_repo: RedisRepository):
     tools = [
         RequestTrackedTool(
             name="retrieve_sources_complete",
-            description="retrieves the list of sources (given by id) and merges the complete content in markdown format",
+            description="retrieves the list of sources (given by id) and merges the complete content in markdown format.     Args: sources (list[str]): list of source IDs",
             tool_function=retrieve_sources_complete,
+            args_schema=SourceIdsInput,
             request_id=request_id,
             redis_repo=redis_repo
         ),
         RequestTrackedTool(
             name="retrieve_sources_summary",
-            description="retrieves the list of sources (given by id) and merges only the summary content in markdown format",
+            description="retrieves the list of sources (given by id) and merges only the summary content in markdown format.  Args: sources (list[str]): list of source IDs",
             tool_function=retrieve_sources_summary,
+            args_schema=SourceIdsInput,
             request_id=request_id,
             redis_repo=redis_repo
         )

@@ -90,8 +90,10 @@ def get_source(source_id: str):
 
 def get_sources(source_ids: list[str]):
     with db_session() as session:
-        return session.query(Source).filter(Source.id.in_(source_ids)).all()
-
+        sources = session.query(Source).filter(Source.id.in_(source_ids)).all()
+        for source in sources:
+            session.expunge(source)
+    return sources
 
 def get_all_sources(conversation_id: str):
     with db_session() as session:

@@ -1,23 +1,14 @@
-// src/app/page.tsx
-"use client"; // Add this directive at the top for useState
+"use client";
 
-import React, { useState } from 'react'; // Import useState
+import React, { useState } from 'react';
 import WavyBackground from '@/components/WavyBackground';
-import CreatePageModal from '@/components/CreatePageModal'; // Import the modal
+import CreatePageModal from '@/components/CreatePageModal';
 
 export default function HomePage() {
-  // State to control modal visibility
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
-
-  // Define the placeholder onCreate function (will be updated later)
-  // const handleCreatePage = (data: { title: string; files: FileList | null; webLinks: string; youtubeLinks: string }) => {
-  //     console.log("Data received from modal:", data);
-  //     // Later: Trigger API call and navigation/progress display
-  // };
-
 
   return (
     <main className="relative flex min-h-screen flex-col items-center justify-center bg-white p-6 overflow-hidden">
@@ -45,8 +36,6 @@ export default function HomePage() {
       <CreatePageModal
         isOpen={isModalOpen}
         onClose={closeModal}
-        // We will pass the actual onCreate handler later:
-        // onCreate={handleCreatePage}
       />
     </main>
   );

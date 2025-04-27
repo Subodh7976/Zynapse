@@ -1,4 +1,3 @@
-// src/components/CreatePageModal.tsx
 "use client";
 
 import React, {
@@ -252,7 +251,7 @@ const CreatePageModal: React.FC<CreatePageModalProps> = ({
                 : "Network error";
             addUploadError(sourceName, `Failed to add source - ${message}`);
           }
-        } // End of for loop
+        }
       } else {
         console.log("No sources to upload.");
       }
@@ -283,7 +282,6 @@ const CreatePageModal: React.FC<CreatePageModalProps> = ({
       : 0;
 
   return (
-    // Modal Structure (no changes needed here)
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 p-4 transition-opacity duration-300 ease-in-out"
       onClick={handleClose}

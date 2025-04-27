@@ -16,7 +16,7 @@ print(f"Redis broker initialized with host: {REDIS_HOST}")
 
 
 async def async_chat(request_id: str, request: str):
-    print(f"Entering async_tutor function with request_id: {request_id}")
+    print(f"Entering async_chat function with request_id: {request_id}")
 
     request: ChatRequest = ChatRequest.model_validate_json(request)
     print(f"Validated chat request: {request.model_dump_json()}")
@@ -29,7 +29,8 @@ async def async_chat(request_id: str, request: str):
 
         redis_repo.update_record(record_id=request_id, record=state)
         print(f"Updated Redis record for request_id: {request_id}")
-    print("Finished processing tutor request")
+    redis_repo.update_record(record_id=request_id, record={"type": "status", "content": "finished"})
+    print("Finished processing Chat request")
 
 
 async_chat_task = dramatiq.actor(async_chat)

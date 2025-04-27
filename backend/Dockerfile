@@ -13,6 +13,7 @@ COPY pyproject.toml poetry.lock ./
 
 RUN --mount=type=cache,target=$POETRY_CACHE_DIR poetry lock
 RUN --mount=type=cache,target=$POETRY_CACHE_DIR poetry install --without dev --verbose
+RUN poetry run pip install uv
 
 FROM python:3.12-slim AS runtime
 
@@ -26,5 +27,7 @@ WORKDIR /app
 COPY --from=builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
 
 COPY ./app .
+
+RUN uvx --version
 
 EXPOSE 8000
