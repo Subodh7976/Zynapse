@@ -1,0 +1,22 @@
+name: CI - Basic Checks on PR
+
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  basic-checks:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Validate Docker Compose configuration
+        run: docker compose -f docker-compose.yml config
+
+      - name: Attempt to build Docker images (if defined)
+        run: docker compose -f docker-compose.yml build --progress=plain
+
+      - name: Basic CI Checks Completed
+        run: echo "Basic CI checks (Docker Compose validation, image build attempt) passed."
