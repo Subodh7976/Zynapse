@@ -16,7 +16,7 @@ interface CreatePageModalProps {
 }
 
 const BACKEND_URL =
-  process.env.NEXT_PUBLIC_BACKEND_URL || "http://34.55.180.24:8000";
+  process.env.NEXT_PUBLIC_BACKEND_URL || "http://34.121.255.112:8000";
 
 const CreatePageModal: React.FC<CreatePageModalProps> = ({
   isOpen,
