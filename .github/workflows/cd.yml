@@ -19,7 +19,7 @@ jobs:
           ssh-private-key: ${{ secrets.GCE_SSH_PRIVATE_KEY }}
 
       - name: Add GCE host to known_hosts
-        run: ssh-keyscan -H ${{ secrets.GCE_INSTANCE_IP }} >> ~/.ssh/known_hosts
+        run: ssh-keyscan -v -H ${{ secrets.GCE_INSTANCE_IP }} >> ~/.ssh/known_hosts
 
       - name: Sync code to GCE VM via rsync
         run: |
