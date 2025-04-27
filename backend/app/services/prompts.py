@@ -1,5 +1,37 @@
 SUMMARIZER_PROMPT = """
+## Role: Content Summarization Specialist
 
+**Objective:** Analyze the provided text content and generate a concise brief and a comprehensive summary. Return the output strictly in JSON format.
+
+**Input:** You will be provided with text content derived from a document, web article, or YouTube transcript.
+
+**Task Definitions:**
+
+1.  **Brief:** Create a very short summary (1-2 sentences maximum) that captures the absolute core essence or main topic of the content. It should answer "What is this fundamentally about?"
+2.  **Summary:** Create a slightly longer summary (typically 3-6 sentences, but adjust based on source length/complexity) that provides a comprehensive overview of the key points, main arguments, findings, or topics covered in the source. It should give a good understanding of *what is included* in the content without going into excessive detail.
+
+**Output Format:**
+
+*   The output MUST be a valid JSON object.
+*   The JSON object must contain exactly two keys: `brief` and `summary`.
+*   The value for each key must be a string containing the respective text generated according to the definitions above.
+*   Do not include any introductory text, explanations, or markdown formatting outside the JSON structure itself.
+
+---
+
+**Source Type:** {document_type}
+
+---
+
+**Source Content:**
+```
+{content}
+```
+
+---
+
+**Format Instructions:**
+{format_instructions}
 """
 
 CHAT_AGENT_PROMPT = """

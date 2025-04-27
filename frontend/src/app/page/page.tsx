@@ -24,7 +24,7 @@ import Link from "next/link";
 import { useTypewriter } from "@/hooks/useTypewriter";
 
 const BACKEND_URL =
-  process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
+  process.env.NEXT_PUBLIC_BACKEND_URL || "http://zynapse-backend-api:8000";
 
 interface Source {
   id: string;

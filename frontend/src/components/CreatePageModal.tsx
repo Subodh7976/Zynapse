@@ -16,7 +16,7 @@ interface CreatePageModalProps {
 }
 
 const BACKEND_URL =
-  process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
+  process.env.NEXT_PUBLIC_BACKEND_URL || "http://zynapse-backend-api:8000";
 
 const CreatePageModal: React.FC<CreatePageModalProps> = ({
   isOpen,
